@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
-import {FeatureModel, MarkerModel} from './shared/models/marker.model';
+import {FeatureModel, MarkerModel, User} from './shared/models/marker.model';
 import {MatDialog} from '@angular/material/dialog';
 import {AddMarkerDialogComponent} from './components/add-marker-dialog/add-marker-dialog.component';
 import {Point} from 'mapbox-gl';
-import {MarkerService} from './shared/services/marker.service';
+import {DatabaseService} from './shared/services/database.service';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +18,7 @@ export class AppComponent implements OnInit {
   lng = -90;
   clickCoords = {lat: 0.0, lng: 0.0};
   markers: mapboxgl.Marker[] = [];
+  users: User[] = [];
   data: MarkerModel = {type: 'FeatureCollection', features: []};
   isRotationOn = true;
   secondsPerRevolution = 120;
@@ -26,10 +27,11 @@ export class AppComponent implements OnInit {
   userInteracting = false;
   spinEnabled = true;
 
-  constructor(private dialog: MatDialog, private markerService: MarkerService) {
+  constructor(private dialog: MatDialog, private databaseService: DatabaseService) {
   }
 
   ngOnInit() {
+    this.loadAllUsersFromDB();
     this.map = new mapboxgl.Map({
       accessToken: 'pk.eyJ1IjoiZGF3a29uIiwiYSI6ImNsbzMyNThzMjBneHIydXVkczBqZWVuMjcifQ.4RwRdbAXLqwimZ8QY2aHnQ',
       container: 'map',
@@ -89,8 +91,19 @@ export class AppComponent implements OnInit {
               coordinates: this.clickCoords
             }
           };
-          this.markerService.addNewToDB(newMarker.properties.content).then(r => this.getAllMarkersFromDB());
+          this.databaseService.addNewMarker(newMarker.properties.content).then(r => this.getAllMarkersFromDB());
 
+          let userName = newMarker.properties.content.who;
+          let userColor = '#000220' // TODO from palete
+          let user = this.getUserFromCache(userName);
+
+          if (user === undefined) {
+            user = {name: userName, color: userColor};
+            this.databaseService.addNewUser(user).then(() => this.loadAllUsersFromDB());
+          } else {
+            user.color = userColor;
+            this.databaseService.updateUser(user).then(() => this.loadAllUsersFromDB());
+          }
 
           this.data.features = [...this.data.features, newMarker];
           let color;
@@ -101,7 +114,11 @@ export class AppComponent implements OnInit {
         }
       });
     });
-    this.initMapEvents();
+    // this.initMapEvents();
+  }
+
+  getUserFromCache(name: string) {
+    return this.users.find(u => u.name === name)
   }
 
   spinGlobe() {
@@ -121,8 +138,16 @@ export class AppComponent implements OnInit {
     }
   }
 
+  loadAllUsersFromDB() {
+    this.databaseService.getUsers().then(response => {
+      response.data?.forEach(u => {
+        this.users.push({name: u.name, color: u.color})
+      })
+    })
+  }
+
   getAllMarkersFromDB() {
-    this.markerService.getAllFromDB().then(response => {
+    this.databaseService.getAllMarkers().then(response => {
       response.data?.forEach(d => {
         const newMarker = {
           type: 'Feature',
@@ -135,7 +160,7 @@ export class AppComponent implements OnInit {
               lng: d.lng,
               lat: d.lat
             },
-            'marker-color': '#3bb2d0',
+            'marker-color': '#000000',
             'marker-size': 'large',
             'marker-symbol': '1'
           },
@@ -157,7 +182,7 @@ export class AppComponent implements OnInit {
   }
 
   addMarker(newMarker: FeatureModel) {
-    this.markers.push(new mapboxgl.Marker()
+    this.markers.push(new mapboxgl.Marker({ "color": "#000000" })
       .setLngLat(newMarker.geometry.coordinates)
       .setPopup(new mapboxgl.Popup().setHTML(`
             <div class="popup">
@@ -188,9 +213,9 @@ export class AppComponent implements OnInit {
         this.userInteracting = false;
         this.spinGlobe();
       });
-      this.map.on('moveend', () => {
-        this.spinGlobe();
-      });
+//      this.map.on('moveend', () => {
+//        this.spinGlobe();
+//      });
     }
   }
 

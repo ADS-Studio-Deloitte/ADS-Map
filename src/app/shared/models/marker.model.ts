@@ -28,6 +28,11 @@ export interface MarkerContent {
   lat: number;
 }
 
+export interface User {
+  name: string;
+  color: string
+}
+
 export enum MarkerType {
   VACATION, CITE, ADS_MEMORIES
 }
