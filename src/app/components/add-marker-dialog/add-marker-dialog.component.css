@@ -17,20 +17,29 @@
 
 .user-input {
   font-family: "Open Sans";
+  border-radius: 5px;
   font-size: 20px;
   height: 30px
 }
 
 .description-input {
   font-family: "Open Sans";
+  border-radius: 5px;
   font-size: 20px;
   height: 100px
 }
 
 .actions-btns-box {
+  margin-top: -10px;
   width: 100%;
 }
 
 .cancel-btn {
   margin-left: 20px;
+}
+
+.color-picker {
+  margin-top: 10px;
+  width: 90%;
+  margin-left: 5%;
 }
