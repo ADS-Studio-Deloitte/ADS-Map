@@ -9,8 +9,8 @@ import {FormBuilder, FormGroup} from '@angular/forms';
   styleUrls: ['./add-marker-dialog.component.css']
 })
 export class AddMarkerDialogComponent {
-  markerInputFormGroup: FormGroup = this.fb.group<{user: string, description: string, type: MarkerType}>({
-    user: '',
+  markerInputFormGroup: FormGroup = this.fb.group<{who: string, description: string, type: MarkerType}>({
+    who: '',
     description: '',
     type: MarkerType.VACATION
   });

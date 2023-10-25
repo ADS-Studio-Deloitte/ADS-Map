@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import * as mapboxgl from 'mapbox-gl';
-import {MarkerModel, MarkerType} from './shared/models/marker.model';
+import {FeatureModel, MarkerModel} from './shared/models/marker.model';
 import {MatDialog} from '@angular/material/dialog';
 import {AddMarkerDialogComponent} from './components/add-marker-dialog/add-marker-dialog.component';
 import {Point} from 'mapbox-gl';
+import {MarkerService} from './shared/services/marker.service';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +26,7 @@ export class AppComponent implements OnInit {
   userInteracting = false;
   spinEnabled = true;
 
-  constructor(private dialog: MatDialog) {
+  constructor(private dialog: MatDialog, private markerService: MarkerService) {
   }
 
   ngOnInit() {
@@ -38,6 +39,7 @@ export class AppComponent implements OnInit {
     });
     this.map.doubleClickZoom.disable();
     this.map.on('load', () => {
+      this.getAllMarkersFromDB();
       this.spinGlobe();
       this.map?.addSource('adsTrips', {
         type: 'geojson',
@@ -62,8 +64,6 @@ export class AppComponent implements OnInit {
         lat: e.lngLat.lat,
         lng: e.lngLat.lng
       };
-      console.log(this.data);
-      console.log(JSON.stringify([e.lngLat.lng, e.lngLat.lat]));
     });
     this.map.on('dblclick', (e) => {
       const dialogRef = this.dialog.open(AddMarkerDialogComponent);
@@ -75,8 +75,10 @@ export class AppComponent implements OnInit {
             properties: {
               id: this.data.features.length.toString(),
               content: {
-                user: result.user,
+                who: result.who,
                 description: result.description,
+                lat: this.clickCoords.lat,
+                lng: this.clickCoords.lng
               },
               'marker-color': '#3bb2d0',
               'marker-size': 'large',
@@ -87,28 +89,15 @@ export class AppComponent implements OnInit {
               coordinates: this.clickCoords
             }
           };
+          this.markerService.addNewToDB(newMarker.properties.content).then(r => this.getAllMarkersFromDB());
+
 
           this.data.features = [...this.data.features, newMarker];
           let color;
           // switch (result.type) {
           //   case MarkerType.VACATION:
           //     color =
-          //
-          // }
 
-          this.markers.push(new mapboxgl.Marker()
-            .setLngLat(newMarker.geometry.coordinates)
-            .setPopup(new mapboxgl.Popup().setHTML(`
-            <div class="popup">
-                <h2 class="marker-user">${newMarker.properties.content.user}</h2>
-                <span class="marker-description">${newMarker.properties.content.description}</span>
-            </div>
-            `)));
-
-          this.markers.forEach(m => {
-            m.remove();
-            m.addTo(this.map as mapboxgl.Map);
-          });
         }
       });
     });
@@ -130,6 +119,52 @@ export class AppComponent implements OnInit {
         this.map?.easeTo({ center, duration: 1000, easing: (n) => n });
       }
     }
+  }
+
+  getAllMarkersFromDB() {
+    this.markerService.getAllFromDB().then(response => {
+      response.data?.forEach(d => {
+        const newMarker = {
+          type: 'Feature',
+          properties: {
+            id: this.data.features.length.toString(),
+            content: {
+              id: d.id,
+              who: d.who,
+              description: d.description,
+              lng: d.lng,
+              lat: d.lat
+            },
+            'marker-color': '#3bb2d0',
+            'marker-size': 'large',
+            'marker-symbol': '1'
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: {
+              lat: d.lat,
+              lng: d.lng
+            }
+          }
+        };
+        this.addMarker(newMarker);
+      });
+      this.markers.forEach(m => {
+        m.remove();
+        m.addTo(this.map as mapboxgl.Map);
+      });
+    });
+  }
+
+  addMarker(newMarker: FeatureModel) {
+    this.markers.push(new mapboxgl.Marker()
+      .setLngLat(newMarker.geometry.coordinates)
+      .setPopup(new mapboxgl.Popup().setHTML(`
+            <div class="popup">
+                <h2 class="marker-user">${newMarker.properties.content.who}</h2>
+                <span class="marker-description">${newMarker.properties.content.description}</span>
+            </div>
+            `)));
   }
 
   initMapEvents() {

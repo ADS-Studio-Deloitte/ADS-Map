@@ -21,8 +21,11 @@ export interface FeatureModel {
 }
 
 export interface MarkerContent {
-  user: string;
+  id?: number;
+  who: string;
   description: string;
+  lng: number;
+  lat: number;
 }
 
 export enum MarkerType {
