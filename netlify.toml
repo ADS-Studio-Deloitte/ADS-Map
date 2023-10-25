@@ -1,6 +1,6 @@
 [build]
 publish = "dist/mapa-a"
-command = "ng build --prod"
+command = "npm run build --prod"
 
 [[redirects]]
 from = "/*"
