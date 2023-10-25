@@ -10,6 +10,11 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatInput, MatInputModule} from '@angular/material/input';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
+import {
+  MAT_COLOR_FORMATS,
+  NGX_MAT_COLOR_FORMATS,
+  NgxMatColorPickerModule
+} from '@angular-material-components/color-picker';
 
 @NgModule({
   declarations: [
@@ -25,9 +30,12 @@ import {MatButtonModule} from '@angular/material/button';
     MatInputModule,
     MatButtonModule,
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgxMatColorPickerModule
   ],
-  providers: [],
+  providers: [
+    { provide: MAT_COLOR_FORMATS, useValue: NGX_MAT_COLOR_FORMATS }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
