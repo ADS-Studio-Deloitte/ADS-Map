@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadAllUsersFromDB();
+    this.loadAllUsersAndMarkersFromDB();
     this.map = new mapboxgl.Map({
       accessToken: 'pk.eyJ1IjoiZGF3a29uIiwiYSI6ImNsbzMyNThzMjBneHIydXVkczBqZWVuMjcifQ.4RwRdbAXLqwimZ8QY2aHnQ',
       container: 'map',
@@ -94,15 +94,15 @@ export class AppComponent implements OnInit {
           this.databaseService.addNewMarker(newMarker.properties.content).then(r => this.getAllMarkersFromDB());
 
           let userName = newMarker.properties.content.who;
-          let userColor = '#000220' // TODO from palete
+          let userColor = `#${result.color.hex}`;
           let user = this.getUserFromCache(userName);
 
           if (user === undefined) {
             user = {name: userName, color: userColor};
-            this.databaseService.addNewUser(user).then(() => this.loadAllUsersFromDB());
+            this.databaseService.addNewUser(user).then(() => this.loadAllUsersAndMarkersFromDB());
           } else {
             user.color = userColor;
-            this.databaseService.updateUser(user).then(() => this.loadAllUsersFromDB());
+            this.databaseService.updateUser(user).then(() => this.loadAllUsersAndMarkersFromDB());
           }
 
           this.data.features = [...this.data.features, newMarker];
@@ -138,11 +138,12 @@ export class AppComponent implements OnInit {
     }
   }
 
-  loadAllUsersFromDB() {
+  loadAllUsersAndMarkersFromDB() {
     this.databaseService.getUsers().then(response => {
       response.data?.forEach(u => {
         this.users.push({name: u.name, color: u.color})
-      })
+      });
+      this.getAllMarkersFromDB();
     })
   }
 
@@ -182,7 +183,10 @@ export class AppComponent implements OnInit {
   }
 
   addMarker(newMarker: FeatureModel) {
-    this.markers.push(new mapboxgl.Marker({ "color": "#000000" })
+    let userName = newMarker.properties.content.who;
+    let user = this.getUserFromCache(userName);
+
+    this.markers.push(new mapboxgl.Marker({ "color": user?.color })
       .setLngLat(newMarker.geometry.coordinates)
       .setPopup(new mapboxgl.Popup().setHTML(`
             <div class="popup">

@@ -7,12 +7,13 @@
 
       <label for="description">Opis </label>
       <textarea id="description" matInput placeholder="Co się tam działo..." formControlName="description" class="description-input"></textarea>
+      <mat-form-field class="color-picker">
+        <input matInput [ngxMatColorPicker]="picker" formControlName="color" [disabled]="disabled">
+        <ngx-mat-color-toggle matSuffix [for]="picker"></ngx-mat-color-toggle>
+        <ngx-mat-color-picker #picker [touchUi]="touchUi" [color]="color"></ngx-mat-color-picker>
+      </mat-form-field>
     </form>
-    <mat-form-field class="color-picker">
-      <input matInput [ngxMatColorPicker]="picker" formControlName="color" [disabled]="disabled">
-      <ngx-mat-color-toggle matSuffix [for]="picker"></ngx-mat-color-toggle>
-      <ngx-mat-color-picker #picker [touchUi]="touchUi" [color]="color"></ngx-mat-color-picker>
-    </mat-form-field>
+
   </div>
   <div mat-dialog-actions class="actions-btns-box">
     <button mat-button (click)="onNoClick()" class="cancel-btn">Anuluj</button>
