@@ -1,0 +1,16 @@
+<div class="main">
+  <h1 mat-dialog-title>Dodaj nowy punkt</h1>
+  <div mat-dialog-content>
+    <form [formGroup]="markerInputFormGroup" class="input-box">
+      <label for="user">Kto: </label>
+      <input id="user" type="text" formControlName="user" class="user-input">
+
+      <label for="description">Opis </label>
+      <textarea id="description" matInput placeholder="Co się tam działo..." formControlName="description" class="description-input"></textarea>
+    </form>
+  </div>
+  <div mat-dialog-actions class="actions-btns-box">
+    <button mat-button (click)="onNoClick()" class="cancel-btn">Anuluj</button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="markerInputFormGroup.value" cdkFocusInitial class="accept-btn">Dodaj</button>
+  </div>
+</div>

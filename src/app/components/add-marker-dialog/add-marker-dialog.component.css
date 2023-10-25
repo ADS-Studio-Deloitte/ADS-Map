@@ -1,0 +1,36 @@
+.main {
+  font-family: "Open Sans";
+  width: 400px;
+  height: 400px;
+}
+
+.input-box {
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.accept-btn {
+  margin-left: auto !important;
+  margin-right: 20px;
+}
+
+.user-input {
+  font-family: "Open Sans";
+  font-size: 20px;
+  height: 30px
+}
+
+.description-input {
+  font-family: "Open Sans";
+  font-size: 20px;
+  height: 100px
+}
+
+.actions-btns-box {
+  width: 100%;
+}
+
+.cancel-btn {
+  margin-left: 20px;
+}
